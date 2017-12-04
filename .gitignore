@@ -102,4 +102,4 @@ ENV/
 
 # others
 .DS_Store
-
+.idea/
