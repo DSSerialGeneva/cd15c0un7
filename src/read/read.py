@@ -18,7 +18,7 @@ img_gray = img.convert('L')
 
 pixels = np.array(img)
 
-pixels_gray = np.array(img_gray) / 255
+pixels_gray = (np.array(img_gray) / 255).flatten()
 
 draw = ImageDraw.Draw(img)
 img.save("../../out/a_test.png")
