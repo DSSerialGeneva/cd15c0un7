@@ -1,24 +1,14 @@
-import io
-
-import numpy as np
-from PIL import Image
 from PIL import ImageDraw
-
 from src.readers import SimpleBSONReader
+from src.transformers.img.img_2_array import Img2Array
+from src.transformers.img.img_2_array_gray_scaled import Img2ArrayGrayScaled
 
-reader = SimpleBSONReader('../../data/train_example.bson')
-
-imageBytes = reader.read()['imgs'][0]['picture']
-
-
-stream = io.BytesIO(imageBytes)
-
-img = Image.open(stream)
+img = SimpleBSONReader.read('../../data/train_example.bson')
 img_gray = img.convert('L')
 
-pixels = np.array(img)
+pixels = Img2Array.transform(img)
 
-pixels_gray = (np.array(img_gray) / 255).flatten()
+pixels_gray = Img2ArrayGrayScaled.transform(img).flatten()
 
 draw = ImageDraw.Draw(img)
 img.save("../../out/a_test.png")

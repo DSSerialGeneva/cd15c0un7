@@ -1,12 +1,16 @@
 import bson
+import io
+from PIL import Image
 
 
 class SimpleBSONReader:
 
-    def __init__(self, filename):
-        self.fileName = filename
+    @staticmethod
+    def read(file_name):
+        bson_file = open(file_name, 'rb')
 
-    def read(self):
-        bson_file = open(self.fileName, 'rb')
+        image_bytes = bson.loads(bson_file.read())['imgs'][0]['picture']
 
-        return bson.loads(bson_file.read())
+        stream = io.BytesIO(image_bytes)
+
+        return Image.open(stream)
