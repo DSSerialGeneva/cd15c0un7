@@ -1,68 +1,26 @@
-import numpy as np
-import mxnet as mx
-import mxnet.metric
-import src.read.read_train_example_saved as rtes
+from src.read.read_train_example import read_and_save_intermediate
+from src.model import model
 
+ROOT_PATH = "../out/"
 
-def ml_acc(label, pred, label_width=2):
-        return float((label == np.round(pred)).sum()) / label_width / pred.shape[0]
+DATA_BSON_PATH = '../data/train_example.bson'
 
+DATA_CSV_PATH = "%strain_example.csv" % ROOT_PATH
+DATA_REDUCED_CSV_PATH = "%spca_train_example.csv" % ROOT_PATH
+FIRST_OCCURENCE_NUMBER = 1
+N_COMPONENTS = 90
 
-batch_size = 4
-nb_hidden_layer = 4
+if __name__ == "__main__":
+    # Read and create csv files from bson data
+    read_and_save_intermediate(
+        path=DATA_BSON_PATH,
+        pca_reduction=True,
+        file_out_path=DATA_CSV_PATH,
+        reduced_file_out_path=DATA_REDUCED_CSV_PATH,
+        root_path=ROOT_PATH,
+        n_components=N_COMPONENTS,
+        first_occurence_number=FIRST_OCCURENCE_NUMBER
+    )
 
-pixels = rtes.read_train_example_saved("../out/train_example.csv")
-
-
-# TODO randomize the selection and create validation set
-ntrain = int(pixels.shape[0]*0.8)
-
-train = pixels[:ntrain, 3:]
-test = pixels[ntrain:, 3:]
-# print(train.shape, train[0, 0:4])
-
-labels = pixels[:, 1]
-unique_labels = np.unique(labels)
-label_train = labels[:ntrain]
-label_test = labels[ntrain:]
-
-for labels_ in unique_labels:
-        # labels_ = labels[2]
-        label_train_one_vs_all = (label_train == labels_)
-        label_test_one_vs_all = (label_test == labels_)
-        print("#(class = %s): Train: %i - Test: %i" % (labels_, sum(label_train_one_vs_all), sum(label_test_one_vs_all)))
-
-
-        train_iter = mx.io.NDArrayIter(train, label_train_one_vs_all, batch_size, shuffle=True)
-        val_iter = mx.io.NDArrayIter(test, label_test_one_vs_all, batch_size)
-
-        # print(label_train[0:3])
-
-        net = mx.sym.Variable('data')
-        net = mx.sym.FullyConnected(net, name='fc1', num_hidden=nb_hidden_layer)
-        net = mx.sym.Activation(net, name='relu1', act_type="relu")
-        net = mx.sym.FullyConnected(net, name='fc2', num_hidden=nb_hidden_layer)
-        net = mx.sym.SoftmaxOutput(net, name='softmax')
-        mx.viz.plot_network(net)
-
-        mod = mx.mod.Module(symbol=net, context=mx.cpu(), data_names=['data'], label_names=['softmax_label'])
-
-
-        #ml_metric = mx.metric.create(ml_acc)
-        #mx.metric.register(type(ml_metric), 'ml_metric')
-
-
-        mod.fit(train_iter,
-                eval_data=val_iter,
-                optimizer='sgd',
-                optimizer_params={'learning_rate': 0.1},
-                eval_metric='acc',
-                num_epoch=8)
-
-        predicted = mod.predict(val_iter)
-        val_iter.label[0][1].shape
-        val_iter.label
-        score = mod.score(val_iter, ['acc', 'F1'])
-        print("[Accuracy score, F1 score]: [%f, %f]" % (score[0][1], score[1][1]))
-
-
+    # Build the model from CSV file
+    model.do_model(batch_size=15, nb_hidden_layer=10, data_file_path=DATA_REDUCED_CSV_PATH)
