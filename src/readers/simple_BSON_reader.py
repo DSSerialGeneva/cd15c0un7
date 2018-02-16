@@ -102,7 +102,7 @@ class SimpleBSONReader:
                         ))
 
             if save_intermediate:
-                f = open(root_path + "csv/" + "%s-%s.csv" % (category_id, product_id), 'w')
+                f = open(root_path + "csv/" + "full/%s-%s.csv" % (category_id, product_id), 'w')
                 f.write(",".join(map(str, flatten_img)))
                 if pca_reduction:
                     f_red = open(root_path + "csv/" + "reduced/pca_%s-%s.csv" % (category_id, product_id), 'w')
