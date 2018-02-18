@@ -32,7 +32,7 @@ pipeline_rebuild = {READ: 0, REBUILD: 1, MODEL: 0}
 pipeline_model = {READ: 0, REBUILD: 0, MODEL: 1}
 pipeline_custom = {READ: 1, REBUILD: 0, MODEL: 1}
 
-pipeline = pipeline_rebuild
+pipeline = pipeline_all
 
 if __name__ == "__main__":
 
